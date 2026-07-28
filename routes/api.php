@@ -9,19 +9,15 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PaymentController;
 
-// ============ Auth (مفتوحة، من غير تسجيل دخول) ============
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
 Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
 
-// ============ محتاجة تسجيل دخول (Sanctum token) ============
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    // بيانات الصنايعي
     Route::post('/craftsman/profile', [CraftsmanProfileController::class, 'store']);
     Route::get('/craftsman/profile', [CraftsmanProfileController::class, 'show']);
 
-    // رفع مستندات التوثيق
     Route::post('/verification/upload', [VerificationController::class, 'upload']);
 
     // ============ المحفظة (بلال) ============
@@ -36,11 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/subscriptions/current', [SubscriptionController::class, 'current']);
     Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe']);
     Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel']);
-    
-// ============ المدفوعات (بلال) ============
+
+    // ============ المدفوعات (بلال) ============
     Route::get('/payments', [PaymentController::class, 'index']);
-Route::post('/payments', [PaymentController::class, 'store']);
-Route::post('/payments/confirm-cash', [PaymentController::class, 'confirmCashPayment']);
+    Route::post('/payments', [PaymentController::class, 'store']);
+    Route::post('/payments/confirm-cash', [PaymentController::class, 'confirmCashPayment']);
 
     // ============ Admin فقط ============
     Route::middleware('role:admin')->prefix('admin')->group(function () {
