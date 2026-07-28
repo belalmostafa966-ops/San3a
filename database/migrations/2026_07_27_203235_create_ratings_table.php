@@ -1,45 +1,28 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-class Rating extends Model
+return new class extends Migration
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'job_id',
-        'rated_by',
-        'rated_user_id',
-        'direction',
-        'score',
-        'behavior_score',
-        'comment',
-    ];
-
-    protected $casts = [
-        'score' => 'integer',
-        'behavior_score' => 'integer',
-    ];
-
-    // الشغلانة اللي التقييم ده بتاعها
-    public function job(): BelongsTo
+    public function up(): void
     {
-        return $this->belongsTo(Job::class);
+        Schema::create('ratings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('job_id');
+            $table->foreignId('rated_by')->constrained('users')->onDelete('cascade');
+            $table->foreignId('rated_user_id')->constrained('users')->onDelete('cascade');
+            $table->string('direction');
+            $table->integer('score');
+            $table->integer('behavior_score')->nullable();
+            $table->text('comment')->nullable();
+            $table->timestamps();
+        });
     }
 
-    // اليوزر اللي بعت التقييم
-    public function ratedBy(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(User::class, 'rated_by');
+        Schema::dropIfExists('ratings');
     }
-
-    // اليوزر اللي اتقيّم
-    public function ratedUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rated_user_id');
-    }
-}
+};

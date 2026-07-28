@@ -1,29 +1,25 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-class Strike extends Model
+return new class extends Migration
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'job_id',
-        'reason',
-        'penalty_applied',
-    ];
-
-    public function user(): BelongsTo
+    public function up(): void
     {
-        return $this->belongsTo(User::class);
+        Schema::create('strikes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('job_id')->nullable();
+            $table->string('reason');
+            $table->boolean('penalty_applied')->default(false);
+            $table->timestamps();
+        });
     }
 
-    public function job(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Job::class);
+        Schema::dropIfExists('strikes');
     }
-}
+};

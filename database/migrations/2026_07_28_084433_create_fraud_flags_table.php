@@ -1,28 +1,25 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-class FraudFlag extends Model
+return new class extends Migration
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'flag_type',
-        'score',
-        'status',
-    ];
-
-    protected $casts = [
-        'score' => 'integer',
-    ];
-
-    public function user(): BelongsTo
+    public function up(): void
     {
-        return $this->belongsTo(User::class);
+        Schema::create('fraud_flags', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('flag_type');
+            $table->integer('score')->nullable();
+            $table->string('status')->default('pending');
+            $table->timestamps();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('fraud_flags');
+    }
+};

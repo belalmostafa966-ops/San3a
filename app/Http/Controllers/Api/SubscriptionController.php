@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class SubscriptionController extends Controller
@@ -41,40 +42,53 @@ class SubscriptionController extends Controller
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
         $wallet = $request->user()->wallet;
 
-        // التأكد إن الرصيد كافي
+        if (!$wallet) {
+            return response()->json(['message' => 'لا توجد محفظة مرتبطة بهذا الحساب'], 400);
+        }
+
+        // التأكد إن الرصيد المتاح كافي
         if ($wallet->availableBalance() < $plan->price) {
             return response()->json(['message' => 'الرصيد غير كافٍ للاشتراك في هذه الباقة'], 400);
         }
 
-        // إلغاء أي اشتراك سابق فعّال
-        Subscription::where('craftsman_id', $request->user()->id)
-            ->where('status', 'active')
-            ->update(['status' => 'cancelled']);
+        try {
+            // تنفيذ الخصم والاشتراك في Transaction واحدة لضمان سلامة البيانات
+            $subscription = DB::transaction(function () use ($request, $plan, $wallet) {
+                // إلغاء أي اشتراك سابق فعّال
+                Subscription::where('craftsman_id', $request->user()->id)
+                    ->where('status', 'active')
+                    ->update(['status' => 'cancelled']);
 
-        // خصم قيمة الاشتراك من المحفظة مباشرة
-        $wallet->balance -= $plan->price;
-        $wallet->save();
+                // خصم قيمة الاشتراك من المحفظة
+                $wallet->balance -= $plan->price;
+                $wallet->save();
 
-        $wallet->transactions()->create([
-            'type' => 'withdrawal',
-            'amount' => $plan->price,
-            'balance_after' => $wallet->balance,
-            'description' => 'اشتراك في باقة ' . $plan->name,
-        ]);
+                // تسجيل حركة السحب
+                $wallet->transactions()->create([
+                    'type' => 'withdrawal',
+                    'amount' => $plan->price,
+                    'balance_after' => $wallet->balance,
+                    'description' => 'اشتراك في باقة ' . $plan->name,
+                ]);
 
-        // إنشاء الاشتراك الجديد
-        $subscription = Subscription::create([
-            'craftsman_id' => $request->user()->id,
-            'plan_id' => $plan->id,
-            'starts_at' => Carbon::now(),
-            'ends_at' => Carbon::now()->addMonth(),
-            'status' => 'active',
-        ]);
+                // إنشاء الاشتراك الجديد
+                return Subscription::create([
+                    'craftsman_id' => $request->user()->id,
+                    'plan_id' => $plan->id,
+                    'starts_at' => Carbon::now(),
+                    'ends_at' => Carbon::now()->addMonth(),
+                    'status' => 'active',
+                ]);
+            });
 
-        return response()->json([
-            'message' => 'تم الاشتراك بنجاح',
-            'subscription' => $subscription->load('plan'),
-        ]);
+            return response()->json([
+                'message' => 'تم الاشتراك بنجاح',
+                'subscription' => $subscription->load('plan'),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'حدث خطأ أثناء معالجة الاشتراك: ' . $e->getMessage()], 500);
+        }
     }
 
     // إلغاء الاشتراك الحالي
@@ -90,6 +104,6 @@ class SubscriptionController extends Controller
 
         $subscription->update(['status' => 'cancelled']);
 
-        return response()->json(['message' => 'تم إلغاء الاشتراك']);
+        return response()->json(['message' => 'تم إلغاء الاشتراك بنجاح']);
     }
 }

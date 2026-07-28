@@ -13,7 +13,7 @@ class WalletController extends Controller
         $wallet = $request->user()->wallet;
 
         if (!$wallet) {
-            return response()->json(['message' => 'لا توجد محفظة'], 404);
+            return response()->json(['message' => 'لا توجد محفظة لهذا المستخدم'], 404);
         }
 
         return response()->json([
@@ -35,6 +35,10 @@ class WalletController extends Controller
         ]);
 
         $wallet = $request->user()->wallet;
+
+        if (!$wallet) {
+            return response()->json(['message' => 'لا توجد محفظة لهذا المستخدم'], 404);
+        }
 
         try {
             $wallet->holdAmount(
@@ -61,14 +65,21 @@ class WalletController extends Controller
 
         $wallet = $request->user()->wallet;
 
-        $wallet->confirmHold(
-            $request->amount,
-            $request->description,
-            $request->reference_id,
-            $request->job_id
-        );
+        if (!$wallet) {
+            return response()->json(['message' => 'لا توجد محفظة لهذا المستخدم'], 404);
+        }
 
-        return response()->json(['message' => 'تم تأكيد الخصم بنجاح']);
+        try {
+            $wallet->confirmHold(
+                $request->amount,
+                $request->description,
+                $request->reference_id,
+                $request->job_id
+            );
+            return response()->json(['message' => 'تم تأكيد الخصم بنجاح']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     // فك التجميد (Release)
@@ -83,20 +94,31 @@ class WalletController extends Controller
 
         $wallet = $request->user()->wallet;
 
-        $wallet->releaseHold(
-            $request->amount,
-            $request->description,
-            $request->reference_id,
-            $request->job_id
-        );
+        if (!$wallet) {
+            return response()->json(['message' => 'لا توجد محفظة لهذا المستخدم'], 404);
+        }
 
-        return response()->json(['message' => 'تم فك التجميد بنجاح']);
+        try {
+            $wallet->releaseHold(
+                $request->amount,
+                $request->description,
+                $request->reference_id,
+                $request->job_id
+            );
+            return response()->json(['message' => 'تم فك التجميد بنجاح']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
     }
 
     // عرض سجل الحركات
     public function transactions(Request $request)
     {
         $wallet = $request->user()->wallet;
+
+        if (!$wallet) {
+            return response()->json(['message' => 'لا توجد محفظة لهذا المستخدم'], 404);
+        }
 
         $transactions = $wallet->transactions()->latest()->paginate(20);
 
