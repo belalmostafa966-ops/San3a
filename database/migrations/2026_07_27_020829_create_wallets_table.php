@@ -17,6 +17,7 @@ return new class extends Migration
         $table->decimal('balance', 10, 2)->default(0.00); // الرصيد الحالي
         $table->boolean('is_active')->default(true); // حالة المحفظة
         $table->timestamps();
+        
     });
 }
 };

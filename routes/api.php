@@ -1,16 +1,13 @@
 <?php
 
-/**
- * دي الـ routes الخاصة بجزء إسراء بس.
- * انسخي المحتوى ده جوة ملف routes/api.php الأساسي بتاع المشروع
- * (أو include الملف ده من جوه api.php لو حابة تسيبيه منفصل).
- */
-
 use App\Http\Controllers\Admin\VerificationAdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CraftsmanProfileController;
 use App\Http\Controllers\Api\VerificationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\PaymentController;
 
 // ============ Auth (مفتوحة، من غير تسجيل دخول) ============
 Route::post('/auth/request-otp', [AuthController::class, 'requestOtp']);
@@ -26,6 +23,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // رفع مستندات التوثيق
     Route::post('/verification/upload', [VerificationController::class, 'upload']);
+
+    // ============ المحفظة (بلال) ============
+    Route::get('/wallet', [WalletController::class, 'show']);
+    Route::post('/wallet/hold', [WalletController::class, 'hold']);
+    Route::post('/wallet/confirm', [WalletController::class, 'confirm']);
+    Route::post('/wallet/release', [WalletController::class, 'release']);
+    Route::get('/wallet/transactions', [WalletController::class, 'transactions']);
+
+    // ============ الاشتراكات (بلال) ============
+    Route::get('/subscriptions/plans', [SubscriptionController::class, 'plans']);
+    Route::get('/subscriptions/current', [SubscriptionController::class, 'current']);
+    Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe']);
+    Route::post('/subscriptions/cancel', [SubscriptionController::class, 'cancel']);
+    
+// ============ المدفوعات (بلال) ============
+    Route::get('/payments', [PaymentController::class, 'index']);
+Route::post('/payments', [PaymentController::class, 'store']);
+Route::post('/payments/confirm-cash', [PaymentController::class, 'confirmCashPayment']);
 
     // ============ Admin فقط ============
     Route::middleware('role:admin')->prefix('admin')->group(function () {
