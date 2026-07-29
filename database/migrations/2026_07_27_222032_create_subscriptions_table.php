@@ -15,8 +15,8 @@ return new class extends Migration
         $table->id();
         $table->foreignId('craftsman_id')->constrained('users')->onDelete('cascade');
         $table->foreignId('plan_id')->constrained('subscription_plans')->onDelete('cascade');
-        $table->timestamp('starts_at');
-        $table->timestamp('ends_at');
+        $table->dateTime('starts_at');
+        $table->dateTime('ends_at');
         $table->enum('status', ['active', 'expired', 'cancelled'])->default('active');
         $table->timestamps();
     });
