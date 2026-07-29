@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Wallet extends Model
 {
-    //
-    protected $fillable = ['user_id', 'balance', 'is_active'];
+    use HasFactory;
 
-public function user()
+    protected $fillable = ['user_id', 'balance', 'held_amount', 'is_active'];
+
+    public function user()
 {
     return $this->belongsTo(User::class);
 }
@@ -17,5 +19,58 @@ public function user()
 public function transactions()
 {
     return $this->hasMany(WalletTransaction::class);
+}
+
+    public function availableBalance()
+    {
+        return $this->balance - $this->held_amount;
+    }
+
+    public function holdAmount($amount, $description = null, $referenceId = null)
+    {
+        if ($this->availableBalance() < $amount) {
+            throw new \Exception('الرصيد المتاح غير كافٍ');
+        }
+
+        $this->held_amount += $amount;
+        $this->save();
+
+        $this->transactions()->create([
+            'type' => 'fee_hold',
+            'amount' => $amount,
+            'description' => $description,
+            'reference_id' => $referenceId,
+        ]);
+    }
+
+    public function confirmHold($amount, $description = null, $referenceId = null)
+    {
+        $this->held_amount -= $amount;
+        $this->balance -= $amount;
+        $this->save();
+
+        $this->transactions()->create([
+            'type' => 'withdrawal',
+            'amount' => $amount,
+            'description' => $description,
+            'reference_id' => $referenceId,
+        ]);
+    }
+
+    public function releaseHold($amount, $description = null, $referenceId = null)
+    {
+        $this->held_amount -= $amount;
+        $this->save();
+
+        $this->transactions()->create([
+            'type' => 'refund',
+            'amount' => $amount,
+            'description' => $description,
+            'reference_id' => $referenceId,
+        ]);
+    }
+    public function hasReachedCreditLimit()
+{
+    return $this->balance <= $this->credit_limit;
 }
 }

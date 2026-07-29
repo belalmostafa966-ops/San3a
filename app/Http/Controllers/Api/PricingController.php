@@ -9,13 +9,10 @@ use Illuminate\Http\Request;
 
 class PricingController extends Controller
 {
-    /**
-     * GET /pricing/rules
-     * عام (بدون تسجيل دخول) — فلتر اختياري بـ profession_id
-     */
+    // عرض قواعد التسعير (حسب المهنة)
     public function rules(Request $request)
     {
-        $query = PricingRule::with('profession');
+        $query = PricingRule::query();
 
         if ($request->has('profession_id')) {
             $query->where('profession_id', $request->profession_id);
@@ -24,13 +21,10 @@ class PricingController extends Controller
         return response()->json($query->get());
     }
 
-    /**
-     * GET /pricing/standardized-services
-     * عام (بدون تسجيل دخول) — فلتر اختياري بـ profession_id
-     */
+    // عرض الخدمات الموحدة (سعر ثابت) - ممكن تتفلتر حسب المهنة
     public function standardizedServices(Request $request)
     {
-        $query = StandardizedServicePrice::with('profession');
+        $query = StandardizedServicePrice::query();
 
         if ($request->has('profession_id')) {
             $query->where('profession_id', $request->profession_id);

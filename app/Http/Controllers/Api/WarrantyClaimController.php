@@ -5,36 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\WarrantyClaim;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class WarrantyClaimController extends Controller
 {
-    /**
-     * GET /warranty-claims
-     * قائمة مطالبات الضمان (paginated)
-     */
+    // عرض كل مطالبات الضمان الخاصة بالمستخدم الحالي
     public function index(Request $request)
     {
-        $claims = WarrantyClaim::paginate(15);
+        $claims = WarrantyClaim::whereHas('job', function ($query) use ($request) {
+            $query->where('client_id', $request->user()->id);
+        })->latest()->paginate(20);
 
         return response()->json($claims);
     }
 
-    /**
-     * POST /warranty-claims
-     * فتح مطالبة ضمان جديدة
-     */
+    // تقديم مطالبة ضمان جديدة
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'job_id' => 'required|exists:jobs,id',
-            'issue_description' => 'required|string',
+        $request->validate([
+            'job_id' => 'required|integer',
+            'issue_description' => 'required|string|max:1000',
             'claim_type' => 'required|in:quality_warranty,accidental_damage',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
 
         $claim = WarrantyClaim::create([
             'job_id' => $request->job_id,
@@ -44,15 +35,12 @@ class WarrantyClaimController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'تم تسجيل مطالبة الضمان بنجاح',
+            'message' => 'تم تسجيل مطالبة الضمان بنجاح، سيتم مراجعتها',
             'claim' => $claim,
         ]);
     }
 
-    /**
-     * GET /warranty-claims/{claim}
-     * تفاصيل مطالبة ضمان واحدة
-     */
+    // عرض تفاصيل مطالبة معينة
     public function show(WarrantyClaim $claim)
     {
         return response()->json($claim);
