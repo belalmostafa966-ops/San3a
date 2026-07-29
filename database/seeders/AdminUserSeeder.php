@@ -11,11 +11,13 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['phone_number' => '01000000000'], // حط الرقم أو الإيميل المعتمد للـ Admin
+            ['phone_number' => '01000000000'],
             [
                 'name' => 'System Admin',
                 'role' => 'admin',
                 'is_active' => true,
+                'phone' => '01000000000', 
+                'password' => Hash::make('12345678'),
             ]
         );
     }
