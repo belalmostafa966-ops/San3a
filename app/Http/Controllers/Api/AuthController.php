@@ -37,10 +37,16 @@ class AuthController extends Controller
         ]);
 
         // TODO: استبدلي دي بنداء فعلي على SMS gateway (فودافون / Twilio)
-        return response()->json([
+        $responseData = [
             'message' => 'تم إرسال كود التحقق',
-            'debug_code' => $code, // TODO: احذفي السطر ده قبل الإنتاج
-        ]);
+        ];
+
+        if (config('app.debug') || app()->environment('local', 'testing')) {
+            $responseData['debug_code'] = $code;
+        }
+
+        return response()->json($responseData);
+
     }
 
     /**

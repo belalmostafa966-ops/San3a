@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -12,7 +13,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Job extends Model
 {
+    use HasFactory;
+
     protected $table = 'jobs_records';
+
 
     protected $fillable = [
         'job_request_id', 'craftsman_id', 'client_id', 'status',

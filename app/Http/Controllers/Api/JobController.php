@@ -76,10 +76,16 @@ class JobController extends Controller
 
         // TODO: ابعتي الكود فعليًا عن طريق SMS gateway أو push notification للعميل
 
-        return response()->json([
+        $responseData = [
             'message' => 'تم إرسال كود الإغلاق للعميل',
-            'debug_code' => $code, // TODO: يتشال قبل الإنتاج
-        ]);
+        ];
+
+        if (config('app.debug') || app()->environment('local', 'testing')) {
+            $responseData['debug_code'] = $code;
+        }
+
+        return response()->json($responseData);
+
     }
 
     /**
