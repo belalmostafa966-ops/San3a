@@ -85,13 +85,17 @@ class PaymentController extends Controller
         $commissionPercent = $rule ? $rule->min_percent : 10; // fallback احتياطي لو مفيش قاعدة أصلاً
         $commissionAmount = ($payment->amount * $commissionPercent) / 100;
         
-$craftsmanWallet = \App\Models\Wallet::where('user_id', $request->craftsman_id)->first();
+        $craftsmanWallet = \App\Models\Wallet::where('user_id', $request->craftsman_id)->first();
 
-if ($craftsmanWallet->hasReachedCreditLimit()) {
-    return response()->json([
-        'message' => 'الصنايعي وصل لحد المديونية المسموح، لا يمكنه استلام شغل جديد حتى يسدد المديونية',
-    ], 403);
-}
+        if (! $craftsmanWallet) {
+            return response()->json(['message' => 'لا توجد محفظة للحرفي المحدد'], 400);
+        }
+
+        if ($craftsmanWallet->hasReachedCreditLimit()) {
+            return response()->json([
+                'message' => 'الصنايعي وصل لحد المديونية المسموح، لا يمكنه استلام شغل جديد حتى يسدد المديونية',
+            ], 403);
+        }
 
 
         // تسجيل العمولة كمديونية (رصيد بالسالب) على محفظة الحرفي

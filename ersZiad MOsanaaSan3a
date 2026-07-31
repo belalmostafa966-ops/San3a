@@ -1,0 +1,10 @@
+[33m013d07e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update README and trigger push confirmation for San3a team
+[33ma558186[m Update codebase and refresh sync for team review
+[33m7fca789[m Fix Rating and Wallet models, add missing Factories, and secure OTP responses
+[33m9034ecc[m Fix migration timestamps, add AdminUserSeeder, and update database seeders
+[33m4ec0670[m Register spatie role middleware alias in bootstrap/app.php
+[33m77b47b6[m Add basic controllers for Ziad's section: Ratings, Pricing, Warranty Claims
+[33mf75519e[m Fix duplicate model/migration code in Ziad's tables and add payout admin controller
+[33m322b321[m Merge pull request #1 from belalmostafa966-ops/ziad-pricing-trust-safety
+[33m1979423[m Add pricing, trust & safety models and migrations
+[33mafa878b[m Resolve merge conflict in routes/api.php

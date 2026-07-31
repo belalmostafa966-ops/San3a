@@ -28,6 +28,10 @@ class PayoutController extends Controller
 
         $wallet = $request->user()->wallet;
 
+        if (! $wallet) {
+            return response()->json(['message' => 'لا توجد محفظة مرتبطة بهذا الحساب'], 400);
+        }
+
         if ($wallet->availableBalance() < $request->amount) {
             return response()->json(['message' => 'الرصيد المتاح غير كافٍ لطلب السحب'], 400);
         }

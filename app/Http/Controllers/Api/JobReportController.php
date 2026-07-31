@@ -81,7 +81,7 @@ class JobReportController extends Controller
 
         // نفس الحدث اللي إسراء بتسمعه عشان تحدّث verification_tier
         // وبلال هيسمعه كمان عشان يخصم العمولة (يعمل Listener مماثل عنده)
-        event(new JobCompletedEvent($job->craftsman));
+        event(new JobCompletedEvent($job->craftsman, $job));
 
         return response()->json([
             'message' => 'تم تأكيد الشغل، شكرًا لتقييمك القادم!',

@@ -64,4 +64,20 @@ public function subscriptions()
 {
     return $this->hasMany(Subscription::class, 'craftsman_id');
 }
+
+public function jobRequests()
+{
+    return $this->hasMany(JobRequest::class, 'client_id');
 }
+
+public function ratingsGiven()
+{
+    return $this->hasMany(Rating::class, 'rated_by');
+}
+
+public function ratingsReceived()
+{
+    return $this->hasMany(Rating::class, 'rated_user_id');
+}
+}
+
